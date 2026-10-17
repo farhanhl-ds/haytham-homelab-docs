@@ -1,0 +1,42 @@
+---
+- name: Install Redis
+  ansible.builtin.apt:
+    name: [redis-server]
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Bind all interfaces (LAN-gated, see defaults)
+  ansible.builtin.lineinfile:
+    path: "{{ redis_conf }}"
+    regexp: "^bind\\s+"
+    line: "bind 0.0.0.0"
+  notify: restart redis
+
+- name: Require password
+  ansible.builtin.lineinfile:
+    path: "{{ redis_conf }}"
+    regexp: "^#?requirepass\\s+"
+    line: "requirepass {{ redis_password }}"
+  notify: restart redis
+  no_log: true
+
+- name: Disable protected mode (gated subnet, password enforced)
+  ansible.builtin.lineinfile:
+    path: "{{ redis_conf }}"
+    regexp: "^protected-mode\\s+"
+    line: "protected-mode no"
+  notify: restart redis
+
+- name: Use systemd supervision
+  ansible.builtin.lineinfile:
+    path: "{{ redis_conf }}"
+    regexp: "^supervised\\s+"
+    line: "supervised systemd"
+  notify: restart redis
+
+- name: Ensure Redis is enabled and started
+  ansible.builtin.systemd:
+    name: redis-server
+    enabled: true
+    state: started

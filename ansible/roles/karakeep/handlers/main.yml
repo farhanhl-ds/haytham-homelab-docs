@@ -1,0 +1,5 @@
+---
+- name: restart karakeep
+  community.docker.docker_compose_v2:
+    project_src: "{{ karakeep_data_dir }}"
+    state: restarted

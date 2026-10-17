@@ -1,0 +1,20 @@
+---
+# Karakeep defaults — 3-container bundle in ONE LXC (sanctioned exception to
+# 1-service-1-LXC). App runs as root upstream, so no UID fix needed for
+# bind-mounts (unlike pgAdmin). kb/services/app-karakeep-420.md
+#
+# Verified 2026-10-14 against upstream v0.33.2 (latest):
+# https://github.com/karakeep-app/karakeep/releases + official
+# docker/docker-compose.yml. We keep browserless (proven working here;
+# upstream says browserless users are unaffected by the chrome migration)
+# instead of the new karakeep-chrome image.
+karakeep_data_dir: /opt/karakeep
+karakeep_version: 0.33.2
+karakeep_image: "ghcr.io/karakeep-app/karakeep:{{ karakeep_version }}"
+karakeep_url: https://karakeep.haytham.internal
+karakeep_port: 3000
+meilisearch_image: getmeili/meilisearch:v1.41.0
+browserless_image: browserless/chrome:v2.57.1
+karakeep_nextauth_secret: "{{ vault_karakeep_nextauth_secret }}"
+karakeep_meili_master_key: "{{ vault_karakeep_meili_master_key }}"
+karakeep_browser_token: "{{ vault_karakeep_browser_token }}"

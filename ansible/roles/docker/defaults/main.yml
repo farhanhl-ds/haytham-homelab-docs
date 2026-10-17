@@ -1,0 +1,4 @@
+---
+# Reusable Docker installer (official apt repo). Consumed via role
+# dependencies by npm, pgadmin, vaultwarden, karakeep.
+# kb/architecture/ansible-strategy.md — one place to fix Docker installs.

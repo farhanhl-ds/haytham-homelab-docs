@@ -1,0 +1,7 @@
+---
+# Pi-hole defaults. Secrets come from group_vars/tier10.yml (vault_*).
+# kb/services/network-pihole-110.md
+pihole_interface: eth0
+pihole_upstream_dns_1: 1.1.1.1
+pihole_upstream_dns_2: 1.0.0.1
+pihole_webpassword: "{{ vault_pihole_webpassword }}"

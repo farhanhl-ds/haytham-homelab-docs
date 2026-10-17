@@ -1,0 +1,74 @@
+---
+- name: Install Postgres and psycopg2
+  ansible.builtin.apt:
+    name: "{{ postgres_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Locate postgresql.conf (robust across apt versions)
+  ansible.builtin.find:
+    paths: /etc/postgresql
+    patterns: postgresql.conf
+    recurse: true
+  register: pg_conf_files
+
+- name: Set Postgres config directory fact
+  ansible.builtin.set_fact:
+    pg_conf_dir: "{{ (pg_conf_files.files | map(attribute='path') | first) | dirname }}"
+
+- name: Listen on all interfaces
+  ansible.builtin.lineinfile:
+    path: "{{ pg_conf_dir }}/postgresql.conf"
+    regexp: "^#?listen_addresses\\s*="
+    line: "listen_addresses = '{{ postgres_listen_addresses }}'"
+  notify: restart postgres
+
+- name: Allow LAN subnet with scram-sha-256
+  ansible.builtin.blockinfile:
+    path: "{{ pg_conf_dir }}/pg_hba.conf"
+    marker: "# {mark} ANSIBLE homelab LAN"
+    block: |
+      host    all    all    {{ postgres_allowed_subnet }}    scram-sha-256
+  notify: restart postgres
+
+- name: Flush handlers so Postgres restarts before provisioning
+  ansible.builtin.meta: flush_handlers
+
+- name: Set superuser password
+  community.postgresql.postgresql_user:
+    name: postgres
+    password: "{{ vault_postgres_superuser_password }}"
+  become_user: postgres
+  no_log: true
+
+- name: Ensure app roles
+  community.postgresql.postgresql_user:
+    name: "{{ item.owner }}"
+    password: "{{ item.password }}"
+  loop: "{{ postgres_databases }}"
+  become_user: postgres
+  no_log: true
+
+- name: Ensure app databases (explicit UTF8, never installer default)
+  community.postgresql.postgresql_db:
+    name: "{{ item.name }}"
+    owner: "{{ item.owner }}"
+    encoding: UTF8
+    lc_collate: C.UTF-8
+    lc_ctype: C.UTF-8
+    template: template0
+  loop: "{{ postgres_databases }}"
+  become_user: postgres
+
+# PostgreSQL 15+ revoked default CREATE on schema public — even DB owners
+# need this grant. Applies to every future app in postgres_databases.
+- name: Grant CREATE and USAGE on schema public to each app owner
+  community.postgresql.postgresql_privs:
+    database: "{{ item.name }}"
+    roles: "{{ item.owner }}"
+    type: schema
+    objs: public
+    privs: CREATE,USAGE
+  loop: "{{ postgres_databases }}"
+  become_user: postgres

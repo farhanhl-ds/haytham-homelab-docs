@@ -1,0 +1,84 @@
+---
+- name: Check whether Pi-hole is already installed
+  ansible.builtin.stat:
+    path: /etc/pihole/setupVars.conf
+  register: pihole_installed
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  when: not pihole_installed.stat.exists
+
+- name: Install prerequisite packages
+  ansible.builtin.apt:
+    name: [curl, ca-certificates]
+    state: present
+  when: not pihole_installed.stat.exists
+
+- name: Create /etc/pihole directory
+  ansible.builtin.file:
+    path: /etc/pihole
+    state: directory
+    mode: "0755"
+  when: not pihole_installed.stat.exists
+
+- name: Prepare setupVars.conf (official Pi-hole unattended config)
+  ansible.builtin.copy:
+    dest: /etc/pihole/setupVars.conf
+    content: |
+      PIHOLE_INTERFACE={{ pihole_interface }}
+      IPV4_ADDRESS={{ ansible_host }}/24
+      IPV6_ADDRESS=
+      PIHOLE_DNS_1={{ pihole_upstream_dns_1 }}
+      PIHOLE_DNS_2={{ pihole_upstream_dns_2 }}
+      QUERY_LOGGING=true
+      INSTALL_WEB_SERVER=true
+      INSTALL_WEB_INTERFACE=true
+      LIGHTTPD_ENABLED=true
+      CACHE_SIZE=10000
+      DNS_FQDN_REQUIRED=true
+      DNS_BOGUS_PRIV=true
+      DNSMASQ_LISTENING=all
+      WEBPASSWORD={{ pihole_webpassword }}
+    mode: "0644"
+  when: not pihole_installed.stat.exists
+
+- name: Download and run official unattended Pi-hole installer
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -sSL https://install.pi-hole.net | bash /dev/stdin --unattended
+  args:
+    creates: /usr/local/bin/pihole
+    executable: /bin/bash
+  when: not pihole_installed.stat.exists
+
+- name: Ensure gravity database is generated (sometimes skipped)
+  ansible.builtin.command:
+    argv: [pihole, -g]
+  changed_when: true
+  register: pihole_gravity
+  retries: 5
+  delay: 10
+  until: pihole_gravity.rc == 0
+  when: not pihole_installed.stat.exists
+
+- name: Set web password (idempotent, v6 command)
+  ansible.builtin.command:
+    argv: [pihole, setpassword, "{{ pihole_webpassword }}"]
+  changed_when: true
+  no_log: true
+  when: not pihole_installed.stat.exists
+
+- name: Deploy wildcard DNS config (*.haytham.internal -> NPM)
+  ansible.builtin.template:
+    src: wildcard-haytham.conf.j2
+    dest: /etc/dnsmasq.d/99-wildcard-haytham.conf
+    mode: "0644"
+  notify: restart pihole-ftl
+
+- name: Enable loading /etc/dnsmasq.d/ (disabled by default in Pi-hole v6)
+  ansible.builtin.command:
+    argv: [pihole-FTL, --config, misc.etc_dnsmasq_d, "true"]
+  changed_when: true
+  notify: restart pihole-ftl

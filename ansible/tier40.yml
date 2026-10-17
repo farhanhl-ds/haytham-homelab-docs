@@ -1,0 +1,6 @@
+---
+- name: Karakeep
+  hosts: karakeep
+  become: true
+  roles:
+    - karakeep

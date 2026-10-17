@@ -1,0 +1,14 @@
+# NOTE: PGADMIN_DEFAULT_* only applies on FIRST RUN. Changing the vault
+# value + re-running does NOT rotate an existing account — use the UI
+# (User Management) or wipe ./data. kb/operations/secret-rotation.md
+services:
+  pgadmin:
+    image: {{ pgadmin_image }}
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: {{ pgadmin_email }}
+      PGADMIN_DEFAULT_PASSWORD: {{ pgadmin_password }}
+    ports:
+      - "80:80"
+    volumes:
+      - ./data:/var/lib/pgadmin

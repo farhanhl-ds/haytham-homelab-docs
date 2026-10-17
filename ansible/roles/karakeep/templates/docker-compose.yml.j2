@@ -1,0 +1,26 @@
+services:
+  karakeep:
+    image: {{ karakeep_image }}
+    restart: unless-stopped
+    ports:
+      - "{{ karakeep_port }}:3000"
+    environment:
+      NEXTAUTH_SECRET: {{ karakeep_nextauth_secret }}
+      NEXTAUTH_URL: {{ karakeep_url }}
+      DATA_DIR: /data
+      MEILI_ADDR: http://meilisearch:7700
+      MEILI_MASTER_KEY: {{ karakeep_meili_master_key }}
+      BROWSER_WEBSOCKET_URL: ws://browserless:3000?token={{ karakeep_browser_token }}
+    volumes:
+      - ./data:/data
+  meilisearch:
+    image: {{ meilisearch_image }}
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: {{ karakeep_meili_master_key }}
+      MEILI_NO_ANALYTICS: "true"
+    volumes:
+      - ./meili_data:/meili_data
+  browserless:
+    image: {{ browserless_image }}
+    restart: unless-stopped

@@ -1,0 +1,6 @@
+---
+# NPM defaults. Admin account + Proxy Hosts are MANUAL post-rebuild steps
+# (SQLite inside container) — see kb/services/network-npm-120.md and
+# kb/operations/rebuild-from-scratch.md. Only the container is IaC'd here.
+npm_data_dir: /opt/npm
+npm_image: jc21/nginx-proxy-manager:2.16.0

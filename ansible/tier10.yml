@@ -1,0 +1,12 @@
+---
+- name: Pi-hole
+  hosts: pihole
+  become: true
+  roles:
+    - pihole
+
+- name: NPM
+  hosts: npm
+  become: true
+  roles:
+    - npm

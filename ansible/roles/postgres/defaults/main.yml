@@ -1,0 +1,5 @@
+---
+# Postgres defaults. Databases/users come from group_vars/tier20.yml
+# (postgres_databases: [{name, owner, password}]).
+# kb/services/data-postgres-210.md
+postgres_packages: [postgresql, postgresql-contrib, python3-psycopg2, acl]

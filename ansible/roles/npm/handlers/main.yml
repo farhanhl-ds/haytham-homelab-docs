@@ -1,0 +1,5 @@
+---
+- name: restart npm
+  community.docker.docker_compose_v2:
+    project_src: "{{ npm_data_dir }}"
+    state: restarted

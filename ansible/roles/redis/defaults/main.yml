@@ -1,0 +1,6 @@
+---
+# Redis defaults. Password comes from group_vars/tier20.yml (vault_redis_password).
+# Gated to LAN subnet via pg_hba-style reasoning: bind-all + requirepass is
+# acceptable on 192.168.100.0/24. kb/services/data-redis-220.md
+redis_conf: /etc/redis/redis.conf
+redis_password: "{{ vault_redis_password }}"

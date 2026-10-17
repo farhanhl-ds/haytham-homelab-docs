@@ -1,0 +1,7 @@
+---
+- name: Vaultwarden
+  hosts: vaultwarden
+  become: true
+  roles:
+    - vaultwarden
+# NOTE: Infisical play removed (deferred) — kb/decisions/ADR-006-infisical-deferred.md.

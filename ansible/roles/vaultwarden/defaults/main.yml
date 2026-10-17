@@ -1,0 +1,9 @@
+---
+# Vaultwarden defaults. SQLite backend (personal use, no shared Postgres).
+# FIRST RUN: set vaultwarden_signups_allowed to "true", run playbook, create
+# the master account, then flip back to "false" and re-run.
+# kb/services/identity-vaultwarden-320.md
+vaultwarden_data_dir: /opt/vaultwarden
+vaultwarden_image: vaultwarden/server:1.37.4
+vaultwarden_signups_allowed: "false"
+vaultwarden_admin_token: "{{ vault_vaultwarden_admin_token }}"

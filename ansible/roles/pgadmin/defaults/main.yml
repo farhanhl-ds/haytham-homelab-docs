@@ -1,0 +1,9 @@
+---
+# pgAdmin defaults. Image runs as non-root UID 5050 — the data dir MUST be
+# chown'd before compose up or the container crash-loops on
+# /var/lib/pgadmin/sessions. kb/services/data-pgadmin-230.md
+pgadmin_data_dir: /opt/pgadmin
+pgadmin_image: dpage/pgadmin4:2026-09-15-1
+pgadmin_uid: "5050"
+pgadmin_email: "{{ pgadmin_default_email }}"
+pgadmin_password: "{{ vault_pgadmin_default_password }}"

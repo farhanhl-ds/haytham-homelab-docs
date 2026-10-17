@@ -1,0 +1,5 @@
+---
+- name: Placeholder (docker role needs no handlers)
+  ansible.builtin.debug:
+    msg: no handlers
+  changed_when: false

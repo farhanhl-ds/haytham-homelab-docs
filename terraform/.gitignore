@@ -1,0 +1,16 @@
+# State files - sensitive, never commit
+*.tfstate
+*.tfstate.*
+
+# Terraform working directory (provider binaries, etc.)
+.terraform/
+
+# Secrets
+terraform.tfvars
+*.auto.tfvars
+!terraform.tfvars.example
+service-account.txt
+
+# NOTE: .terraform.lock.hcl is intentionally NOT ignored.
+# It pins the provider version in use - must be committed
+# so every environment/machine uses exactly the same provider version.

@@ -1,0 +1,20 @@
+---
+- name: Create pgAdmin data directory with image UID ownership
+  ansible.builtin.file:
+    path: "{{ pgadmin_data_dir }}/data"
+    state: directory
+    owner: "{{ pgadmin_uid }}"
+    group: "{{ pgadmin_uid }}"
+    mode: "0755"
+
+- name: Deploy pgAdmin compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ pgadmin_data_dir }}/docker-compose.yml"
+    mode: "0644"
+  notify: restart pgadmin
+
+- name: Bring pgAdmin up
+  community.docker.docker_compose_v2:
+    project_src: "{{ pgadmin_data_dir }}"
+    state: present

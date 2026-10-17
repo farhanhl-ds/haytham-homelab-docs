@@ -1,0 +1,4 @@
+# Ansible runtime artefacts — never commit
+*.retry
+.vault_pass
+collections/

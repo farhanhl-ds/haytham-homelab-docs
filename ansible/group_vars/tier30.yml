@@ -1,0 +1,17 @@
+---
+# Tier 30 — identity layer (Vaultwarden only; Infisical deferred, see
+# kb/decisions/ADR-006-infisical-deferred.md).
+# SECRET BOOTSTRAP: replace CHANGEME with ansible-vault encrypt_string
+# output (see README.md).
+# FUTURE CROSS-TIER RULE (when a Tier 30 app consumes Tier 20 again): vars in
+# one group_vars file are invisible to other inventory groups — duplicate the
+# value under a group-scoped name with identical plaintext (generate once,
+# encrypt twice). Pattern first seen with Infisical; kept here for revival.
+vault_vaultwarden_admin_token: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          36313733373235613934663538653366336235346132373665353931626161616134313534396230
+          6663353039633232646263623162626565613734326666340a356633613830663664616135303738
+          38616539656565356364663938333762626163326339383661373662393036373035353637313037
+          3534613236353465300a363339373665376132653635303062626563376333356631353330356238
+          30633262376633393232656630623265363034663830376331333534356638623736613933366363
+          3636323463626263346435336134346132313836386463656238
